@@ -66,6 +66,7 @@ async function getDetails(id) {
   // GET MOVIE DETAILS
   const name = resultJSON.title;
   const rating = resultJSON.vote_average;
+  const ratingCount = resultJSON.vote_count;
   const genres = resultJSON.genres.map(el => el.name).join(", ");
   const year = resultJSON.release_date.slice(0,4);
   const overview = resultJSON.overview;
@@ -86,14 +87,16 @@ async function getDetails(id) {
   // CHECK IF A MOVIE HAS BEEN LIKED
   let likesArr = JSON.parse(localStorage.getItem("favourites"));
   let favourite;
-  let like = likesArr.some(el => el === name);
+  if (likesArr) {
+     var like = likesArr.some(el => el === name);
+  }
   if (like) {
     favourite = true;
   } else {
     favourite = false;
   }
 
-  return {name, rating, year, genres, overview, duration, cast, crew, imgURL, favourite};
+  return {name, rating, ratingCount, year, genres, overview, duration, cast, crew, imgURL, favourite};
 
 } catch(err) {
     alert(err)
@@ -129,7 +132,7 @@ function displayInfo(event) {
             <div class="movie-info">
                 <h1 class="movie-title">${movieInfo[index].name} - ${movieInfo[index].year}</h1>
                 <p><strong>GENRE:</strong> ${movieInfo[index].genres}</p>
-                <p class="rating"><strong>RATING:</strong> ${movieInfo[index].rating}</p>
+                <p class="rating"><strong>RATING:</strong> ${movieInfo[index].rating} (${movieInfo[index].ratingCount} votes)</p>
                 <p class="crew"><strong>CREW:</strong> ${movieInfo[index].crew}</p>
                 <p class="cast"><strong>CAST:</strong> ${movieInfo[index].cast}</p>
                 <b><span id="fav-text" style="color:red"></span></b>
@@ -159,47 +162,50 @@ function generateImgURL(url, size, path) {
 }
 
 // IMPLEMENTING MOVIE SEARCH
-function movieSearch() {
+async function movieSearch() {
 
     // READ VALUE FROM THE SEARCH FIELD
-    let value = document.querySelector(".search_field").value.toString();
+    let query = document.querySelector(".search_field").value.toString();
     // DISPLAY MOVIE INFO IN DOM
-    if (value) {
+    if (query) {
+        try {
         document.getElementById("middle1").innerHTML = "";
-        let titles = movieInfo.map(el => el.name);
-        let index = titles.findIndex(el => el === value);
+        let movie = await fetch (`https://api.themoviedb.org/3/search/movie?api_key=821e6e287624c7921335f083519db105&language=en-US&query=${query}&page=1&include_adult=false`)
+        let movieJSON = await movie.json();
 
-        let markUp = `
-        <div id="middle-container">
-        <div class="image1"><img class="image" src="${movieInfo[index].imgURL}" alt="${movieInfo[index].name}"></div>
-                <div class="movie-info">
-                    <h1 class="movie-title">${movieInfo[index].name} - ${movieInfo[index].year}</h1>
-                    <p><strong>GENRE:</strong> ${movieInfo[index].genres}</p>
-                    <p class="rating"><strong>RATING:</strong> ${movieInfo[index].rating}</p>
-                    <p class="crew"><strong>CREW:</strong> ${movieInfo[index].crew}</p>
-                    <p class="cast"><strong>CAST:</strong> ${movieInfo[index].cast}</p>
-                    <b><span id="fav-text" style="color:red"></span></b>
-                    <p id="rem-fav"></p>
-                    <button class="favourites" id="${index}">Add to favourites</button><button id="close">Close window</button>
-                </div>
-            <div class="description">
-               <p><strong>OVERVIEW:</strong> ${movieInfo[index].overview}</p>
-        </div>
-        </div>`;
-        document.getElementById("middle1").innerHTML = markUp;
-        document.getElementById("close").addEventListener("click", clearUI);
-        document.querySelector(".favourites").addEventListener("click", addToFavourites);
-        
-        if (movieInfo[index].favourite === true) {
-            document.querySelector(".favourites").remove();
-            document.getElementById("fav-text").innerHTML = "Added to favourites!";
-            document.getElementById("rem-fav").innerHTML = `<button id="rem-${index}">Remove from favourites</button>`;
-            document.getElementById(`rem-${index}`).addEventListener("click", removeFromFavourites);
-        }
+        let id = movieJSON.results[0].id;
 
+        getDetails(id).then(res => {
+            let markUp = `
+            <div id="middle-container">
+            <div class="image1"><img class="image" src="${res.imgURL}" alt="${res.name}"></div>
+                    <div class="movie-info">
+                        <h1 class="movie-title">${res.name} - ${res.year}</h1>
+                        <p><strong>GENRE:</strong> ${res.genres}</p>
+                        <p class="rating"><strong>RATING:</strong> ${res.rating} (${res.ratingCount} votes)</p>
+                        <p class="crew"><strong>CREW:</strong> ${res.crew}</p>
+                        <p class="cast"><strong>CAST:</strong> ${res.cast}</p>
+                        <b><span id="fav-text" style="color:red"></span></b>
+                        <p id="rem-fav"></p>
+                        <button id="close">Close window</button>
+                    </div>
+                <div class="description">
+                   <p><strong>OVERVIEW:</strong> ${res.overview}</p>
+            </div>
+            </div>`;
+
+            document.getElementById("middle1").innerHTML = markUp;
+            document.getElementById("close").addEventListener("click", clearUI);
+        })
+        } catch(error) {
+            document.getElementById("middle1").innerHTML = "";
+            let markUp = `<h1 id="error">NO RESULTS FOUND.</h1>`;
+            document.getElementById("middle1").innerHTML = error;
+        }    
     }
+    
+};
 
-} 
 
 function clearUI() {
     document.getElementById("middle1").innerHTML = "";
@@ -251,7 +257,7 @@ function removeFromFavourites(event) {
             <div class="movie-info">
                 <h1 class="movie-title">${movieInfo[index].name} - ${movieInfo[index].year}</h1>
                 <p><strong>GENRE:</strong> ${movieInfo[index].genres}</p>
-                <p class="rating"><strong>RATING:</strong> ${movieInfo[index].rating}</p>
+                <p class="rating"><strong>RATING:</strong> ${movieInfo[index].rating} (${movieInfo[index].ratingCount} votes)</p>
                 <p class="crew"><strong>CREW:</strong> ${movieInfo[index].crew}</p>
                 <p class="cast"><strong>CAST:</strong> ${movieInfo[index].cast}</p>
                 <b><span id="fav-text" style="color:red"></span></b>
@@ -288,7 +294,7 @@ function favouriteMovieInfo(event) {
             <div class="movie-info">
                 <h1 class="movie-title">${movieInfo[index].name} - ${movieInfo[index].year}</h1>
                 <p><strong>GENRE:</strong> ${movieInfo[index].genres}</p>
-                <p class="rating"><strong>RATING:</strong> ${movieInfo[index].rating}</p>
+                <p class="rating"><strong>RATING:</strong> ${movieInfo[index].rating} (${movieInfo[index].ratingCount} votes)</p>
                 <p class="crew"><strong>CREW:</strong> ${movieInfo[index].crew}</p>
                 <p class="cast"><strong>CAST:</strong> ${movieInfo[index].cast}</p>
                 <b><span id="fav-text" style="color:red"></span></b>
