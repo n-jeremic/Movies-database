@@ -4,6 +4,12 @@ document.getElementById("flex-container-right").addEventListener("click", displa
 document.querySelector(".button_search").addEventListener("click", movieSearch);
 document.querySelector(".dropdown-content").addEventListener("click", favouriteMovieInfo);
 window.addEventListener("load", displayLikes);
+window.addEventListener("hashchange", function () {
+    if (location.href === "file:///C:/Users/Nikola/Desktop/practice/Untitled-1.html") {
+        clearUI();
+        document.querySelector(".search_field").value = null;
+    }
+});
 
 // STORE THE ARRAY
 let movieInfo;
@@ -30,6 +36,17 @@ async function movies() {
     })
 
     const ids = movies.results.map(el => el.id);
+    let likesArr = JSON.parse(localStorage.getItem("favourites"));
+    if (likesArr) {
+    let likesId = likesArr.map(el => el.id)
+    likesId.forEach(el => {
+       if (ids.some(elem => el === elem) === false) {
+           ids.push(el);
+       }
+       return ids;
+    });
+    }
+
     const details = ids.map(getDetails);
     let finalRes = [];
     details.forEach(function(el) {
@@ -41,13 +58,14 @@ async function movies() {
 
     
     } catch(err) {
-        alert(err)
+        console.log(err);
     }
 
 };
 
 // GETTING MOVIE DETAILS
 async function getDetails(id) {
+
   try {
   const result = await fetch (`https://api.themoviedb.org/3/movie/${id}?api_key=821e6e287624c7921335f083519db105&language=en-US1`);
   const resultJSON = await result.json();
@@ -88,7 +106,7 @@ async function getDetails(id) {
   let likesArr = JSON.parse(localStorage.getItem("favourites"));
   let favourite;
   if (likesArr) {
-     var like = likesArr.some(el => el === name);
+     var like = likesArr.some(el => el.name === name);
   }
   if (like) {
     favourite = true;
@@ -96,10 +114,10 @@ async function getDetails(id) {
     favourite = false;
   }
 
-  return {name, rating, ratingCount, year, genres, overview, duration, cast, crew, imgURL, favourite};
+  return {name, rating, ratingCount, year, genres, overview, duration, cast, crew, imgURL, favourite, id};
 
 } catch(err) {
-    alert(err)
+    console.log(err);
 }
 
 }
@@ -112,6 +130,8 @@ function displayTitle(el, index) {
 
 
 function displayInfo(event) {
+
+    location.hash = "#part1";
 
     // GET THE VALUE OF THE TARGET ELEMENT
     let id = event.target.id;
@@ -137,7 +157,7 @@ function displayInfo(event) {
                 <p class="cast"><strong>CAST:</strong> ${movieInfo[index].cast}</p>
                 <b><span id="fav-text" style="color:red"></span></b>
                 <p id="rem-fav"></p>
-                <button class="favourites" id="${index}">Add to favourites</button><button id="close">Close window</button>
+                <button class="favourites">Add to favourites</button><button id="close">Close window</button>
             </div>
         <div class="description">
            <p><strong>OVERVIEW:</strong> ${movieInfo[index].overview}</p>
@@ -150,8 +170,8 @@ function displayInfo(event) {
     if (movieInfo[index].favourite === true) {
         document.querySelector(".favourites").remove();
         document.getElementById("fav-text").innerHTML = "Added to favourites!";
-        document.getElementById("rem-fav").innerHTML = `<button id="rem-${index}">Remove from favourites</button>`;
-        document.getElementById(`rem-${index}`).addEventListener("click", removeFromFavourites);
+        document.getElementById("rem-fav").innerHTML = `<button id="rem">Remove from favourites</button>`;
+        document.getElementById(`rem`).addEventListener("click", removeFromFavourites);
     }
 }
 }
@@ -164,8 +184,11 @@ function generateImgURL(url, size, path) {
 // IMPLEMENTING MOVIE SEARCH
 async function movieSearch() {
 
+    location.hash = "#part1";
+
     // READ VALUE FROM THE SEARCH FIELD
     let query = document.querySelector(".search_field").value.toString();
+    
     // DISPLAY MOVIE INFO IN DOM
     if (query) {
         try {
@@ -187,7 +210,7 @@ async function movieSearch() {
                         <p class="cast"><strong>CAST:</strong> ${res.cast}</p>
                         <b><span id="fav-text" style="color:red"></span></b>
                         <p id="rem-fav"></p>
-                        <button id="close">Close window</button>
+                        <button class="favourites">Add to favourites</button><button id="close">Close window</button>
                     </div>
                 <div class="description">
                    <p><strong>OVERVIEW:</strong> ${res.overview}</p>
@@ -195,50 +218,102 @@ async function movieSearch() {
             </div>`;
 
             document.getElementById("middle1").innerHTML = markUp;
+            document.querySelector(".favourites").addEventListener("click", function () {
+                addToFavourites(id);
+            });
             document.getElementById("close").addEventListener("click", clearUI);
+
+        // CHECK IF REQUIRED MOVIE IS IN FAVOURITES
+        let ids = movieInfo.map(el => el.id);
+        let i = ids.findIndex(el => el === id);
+            if (i !== -1 && movieInfo[i].favourite === true) {
+                document.querySelector(".favourites").remove();
+                document.getElementById("fav-text").innerHTML = "Added to favourites!";
+                document.getElementById("rem-fav").innerHTML = `<button id="rem">Remove from favourites</button>`;
+                document.getElementById(`rem`).addEventListener("click", removeFromFavourites);
+        };
         })
         } catch(error) {
             document.getElementById("middle1").innerHTML = "";
             let markUp = `<h1 id="error">NO RESULTS FOUND.</h1>`;
-            document.getElementById("middle1").innerHTML = error;
+            document.getElementById("middle1").innerHTML = markUp;
         }    
-    }
-    
+    } 
 };
-
 
 function clearUI() {
     document.getElementById("middle1").innerHTML = "";
 }
 
-function addToFavourites(event) {
+function addToFavourites(id) {
+    let array = document.querySelector(".movie-title").childNodes[0].nodeValue.split(" - ");
+    let title = array[0];
+    let titles = movieInfo.map(el => el.name);
+    let index = titles.findIndex(el => el === title);
 
-    let index = event.target.id;
-    let markUp = `<p id="${index}" class="fav-movie">${movieInfo[index].name}</p>`
-    
+    if (index !== -1) {
+
+    let markUp = `<p class="fav-movie">${movieInfo[index].name}</p>`
     document.querySelector(".dropdown-content").innerHTML += markUp;
 
     movieInfo[index].favourite = true;
     document.querySelector(".favourites").remove();
     document.getElementById("fav-text").innerHTML = "Added to favourites!";
-    document.getElementById("rem-fav").innerHTML = `<button id="rem-${index}">Remove from favourites</button>`;
-    document.getElementById(`rem-${index}`).addEventListener("click", removeFromFavourites);
+    document.getElementById("rem-fav").innerHTML = `<button id="rem">Remove from favourites</button>`;
+    document.getElementById(`rem`).addEventListener("click", removeFromFavourites);
 
-    // ADD FAVOURITES TO LOCAL STORAGE
-    if (likes === undefined) {
-        likes = [];    
-        likes.push(movieInfo[index].name);
-        let likesString = JSON.stringify(likes);
-        localStorage.setItem(`favourites`, likesString);
+     // ADD FAVOURITES TO LOCAL STORAGE
+    if (likes === undefined || likes === null) {
+            likes = []; 
+            let obj = {name:movieInfo[index].name, id:movieInfo[index].id};  
+            likes.push(obj);
+            let likesString = JSON.stringify(likes);
+            localStorage.setItem(`favourites`, likesString);
     } else {
-        likes.push(movieInfo[index].name);
-        let likesString = JSON.stringify(likes);
-        localStorage.setItem(`favourites`, likesString);
+            let obj = {name:movieInfo[index].name, id:movieInfo[index].id};  
+            likes.push(obj);
+            let likesString = JSON.stringify(likes);
+            localStorage.setItem(`favourites`, likesString);
     }
-}
 
-function removeFromFavourites(event) {
+    document.getElementById("heart").className = "fas fa-heart";
+    document.querySelector(".tooltiptext").innerHTML = `${likes.length}`;  
 
+    } else {
+
+        getDetails(id).then(res => {
+            let markUp = `<p class="fav-movie">${res.name}</p>`
+            document.querySelector(".dropdown-content").innerHTML += markUp;
+            res.favourite = true;
+            movieInfo.push(res);
+
+            document.querySelector(".favourites").remove();
+            document.getElementById("fav-text").innerHTML = "Added to favourites!";
+            document.getElementById("rem-fav").innerHTML = `<button id="rem">Remove from favourites</button>`;
+            document.getElementById(`rem`).addEventListener("click", removeFromFavourites);
+             
+             // ADD FAVOURITES TO LOCAL STORAGE
+            if (likes === undefined || likes === null) {
+                likes = []; 
+                let obj = {name:res.name, id:res.id};  
+                likes.push(obj);
+                let likesString = JSON.stringify(likes);
+                localStorage.setItem(`favourites`, likesString);
+            } else {
+                let obj = {name:res.name, id:res.id};  
+                likes.push(obj);
+                let likesString = JSON.stringify(likes);
+                localStorage.setItem(`favourites`, likesString);
+            }
+
+            document.getElementById("heart").className = "fas fa-heart";
+            document.querySelector(".tooltiptext").innerHTML = `${likes.length}`;    
+
+        })
+    }  
+};
+
+function removeFromFavourites() {
     let array = document.querySelector(".movie-title").childNodes[0].nodeValue.split(" - ");
     let title = array[0];
     let titles = movieInfo.map(el => el.name);
@@ -273,15 +348,23 @@ function removeFromFavourites(event) {
     document.querySelector(".favourites").addEventListener("click", addToFavourites);
 
     // REMOVE FAVOURITES FROM LOCAL STORAGE
-    let i = likes.findIndex(el => el === movieInfo[index].name);
+    let i = likes.findIndex(el => el.name === movieInfo[index].name);
     likes.splice(i, 1);
     let likesString = JSON.stringify(likes);
     localStorage.setItem(`favourites`, likesString);
-    
+
+    if (likes.length === 0) {
+        document.getElementById("heart").className = "far fa-heart";
+    }
+
+    document.querySelector(".tooltiptext").innerHTML = `${likes.length}`;    
+
 }
 
 
 function favouriteMovieInfo(event) {
+
+    location.hash = "#part1"
     
     if (event.target.id !== "drop") {
 
@@ -321,13 +404,14 @@ function favouriteMovieInfo(event) {
 function displayLikes() {
 
     let likesArr = JSON.parse(localStorage.getItem("favourites"));
+    document.querySelector(".tooltiptext").innerHTML = `${likesArr.length}`;    
 
+    if (likesArr.length > 0) {
+    document.getElementById("heart").className = "fas fa-heart";    
     likesArr.forEach(el => {
-
-        let markUp = `<p class="fav-movie">${el}</p>`
-    
+        let markUp = `<p class="fav-movie">${el.name}</p>`
         document.querySelector(".dropdown-content").innerHTML += markUp;
-    })
+    }) };
     
     likes = likesArr;
     return likes;

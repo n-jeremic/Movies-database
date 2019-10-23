@@ -180,3 +180,28 @@ body {
     top: 400px;
     right: 160px;
 }
+
+#error {
+    text-align: center;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltiptext {
+    border: 1px solid grey;
+    background-color: lightyellow;
+    color: black;
+    width: 10px;
+    height: 8px;
+    position: absolute;
+    right: 0;
+    bottom: 40px;
+    z-index: 1;
+    padding: 2px;
+    padding-bottom: 10px;
+    text-align: center;
+
+}
