@@ -426,9 +426,15 @@ function displayLikes() {
 async function hash1(title) {
     let titlesArr = movieInfo.map(el => el.name);
     let index = titlesArr.findIndex(el => el === title);
-    
+    let title1;
+
+    let element = document.getElementById("middle-container");
+    if (typeof element !== undefined && element !== null) {
     let array = document.querySelector(".movie-title").childNodes[0].nodeValue.split(" - ");
-    let title1 = array[0];
+    title1 = array[0];
+    } else {
+    title1 = "jera";
+    }
 
     if (title !== title1 && index !== -1) {
         let markUp = `
@@ -458,7 +464,7 @@ async function hash1(title) {
             document.getElementById("rem-fav").innerHTML = `<button id="rem">Remove from favourites</button>`;
             document.getElementById(`rem`).addEventListener("click", removeFromFavourites);
         }
-    } else if (title !== title1 && index === -1) {
+    } else if (title !== title1 && index === -1 && location.href !== "file:///C:/Users/Nikola/Desktop/practice/Untitled-1.html") {
         try {
             document.getElementById("middle1").innerHTML = "";
             let movie = await fetch (`https://api.themoviedb.org/3/search/movie?api_key=821e6e287624c7921335f083519db105&language=en-US&query=${title}&page=1&include_adult=false`)
@@ -496,5 +502,5 @@ async function hash1(title) {
                 let markUp = `<h1 id="error">NO RESULTS FOUND.</h1>`;
                 document.getElementById("middle1").innerHTML = markUp;
             }    
-    }
+    } 
 }
