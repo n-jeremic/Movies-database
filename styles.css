@@ -1,0 +1,204 @@
+body {
+    background-image: linear-gradient( #d9d9d9, #f2f2f2);
+    background-repeat: repeat-y;
+}
+
+.heading {
+    height: 160px;
+    background-color: black;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+.blue-font {
+    color: #286090;
+}
+
+.page-header {
+    margin: 0 0 0 10px;
+    border-bottom: 1px solid #777;
+}
+
+h1 {
+    margin-bottom: 0px;
+}
+
+.img-pad {
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.form-control {
+    height: 46px;
+    font-size: 18px;
+}
+
+.drop-customize {
+    height: 46px;
+    font-size: 18px;
+}
+
+.dropdown, .dropup {
+    margin-top: -10px;
+}
+
+.btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
+    outline: 0px;
+}
+
+.center-block {
+    display: block;
+    margin-left: auto;
+    margin-right: 40px;
+    margin-top: -10px;
+}
+
+.no-padding {
+    padding: 0px;
+}
+
+.no-border-bottom {
+    border-bottom: 0px;
+}
+
+.thumbnail .caption {
+    padding: 0;
+}
+
+.rec-padding {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.rec-item {
+    min-height: 255px;
+    max-height: 255px;
+}
+.thumbnail-custom {
+    height: 460px;
+    min-width: 205px;
+    margin-bottom: 0px;
+}
+
+.thumbnail-recomm {
+   height: 401px;
+}
+
+.now-playing, .popular, .top-rated {
+    display: flex;
+    overflow-x: scroll;
+}
+
+.height {
+    height: 50px;
+}
+
+.height-button {
+    height: 30px;
+}
+
+.height-HP {
+    height: 40px;
+}
+
+.panel {
+    margin: 0px;
+}
+
+.panel-height {
+    min-height: 677px;
+}
+
+.panel-title-font {
+    font-size: 25px;
+    color: black;
+}
+
+.panel-default>.panel-heading {
+    background-image:linear-gradient(to right, #a6a6a6,#d9d9d9);
+    border-left: 8px solid #0066ff;
+    border-radius: 0px;
+}
+
+.container {
+    box-shadow: 0 40px 40px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.tab-content>.tab-pane {
+    padding: 15px;
+}
+
+.cast-margin {
+    margin-top: 10px;
+}
+
+.bottom-margin {
+    margin-bottom: 15px;
+}
+
+.top-margin  {
+    margin-top: -50px;
+}
+
+.movie-basics {
+    padding-left: 20px;
+}
+
+.movie-basics p {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.infoHeader {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.actors, .producers {
+    font-size: 16px;
+    color: #333;
+}
+
+.actors, .producers:hover {
+    cursor: pointer;
+}
+
+.rec-item:hover {
+    cursor: pointer;
+}
+
+.castImgs {
+    display: flex;
+    overflow-x: scroll;
+    margin-top: 15px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 8px;
+}
+
+.actorImg {
+    min-width: 150px;
+    min-height: 210px;
+}
+
+.actorImg:hover {
+    cursor: pointer;
+}
+
+.compInfo {
+    min-height: 150px;
+}
+
+.favourite-item:hover {
+    cursor: pointer;
+    color: blue;
+}
+
+.favourite-item, .no-favourite-movie, .no-favourite-people {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+}
