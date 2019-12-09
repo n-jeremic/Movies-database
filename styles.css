@@ -202,3 +202,24 @@ h1 {
     color: #333;
     white-space: nowrap;
 }
+
+#myPredict {
+    position: absolute;
+    z-index: 10;
+    width: 515px;
+    box-shadow: 0 40px 40px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+}    
+
+.userInterface {
+    z-index: 0;
+}
+
+.predictionItem {
+    color: #333;
+}
+
+.predictionItem:hover {
+    color: blue;
+    cursor: pointer;
+}
