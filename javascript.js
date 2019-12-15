@@ -190,6 +190,21 @@ function init() {
     document.querySelector(".search-button").addEventListener("click", multiSearch);
     document.querySelector(".search").addEventListener("keyup", predictions);
     document.querySelector(".search").addEventListener("keyup", clearPredictions2);
+    document.querySelector(".search").addEventListener("click", function() {
+        const query = document.querySelector(".search").value;
+        if (query.length === 0) {
+            const history = localStorage.getItem("history");
+            if (history !== null) {
+                const historyArr = JSON.parse(history);
+                historyHTML(historyArr.reverse());
+            } else {
+                let markUp = `<li class="list-group-item">No search history.</li>`;
+                document.getElementById("myPredict").style.display = "block";
+                document.getElementById("myPredict").innerHTML = markUp;
+            }
+        }
+    })
+    document.querySelector(".search").addEventListener("blur", clearPredictions2);
 
 
     if (localStorage.getItem("favouritePeople")) {
@@ -761,19 +776,29 @@ function removeFavPerson(name, id) {
 
 async function multiSearch() {
     const query = document.querySelector(".search").value;
-    const searchCall = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=821e6e287624c7921335f083519db105&language=en-US&query=${query}&page=1&include_adult=false`);
-    const searchJSON = await searchCall.json();
-    const mediaType = searchJSON.results[0].media_type;
-    const id = searchJSON.results[0].id;
+    if (query.length > 0) {
+        const searchCall = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=821e6e287624c7921335f083519db105&language=en-US&query=${query}&page=1&include_adult=false`);
+        const searchJSON = await searchCall.json();
+        const mediaType = searchJSON.results[0].media_type;
+        const id = searchJSON.results[0].id;
+        let name;
+    
+        if (mediaType === "person") {
+            personInfoSearch(id);
+            name = searchJSON.results[0].name;
+        } else if (mediaType === "movie") {
+            displayMovieInfoSearch(id);
+            name = searchJSON.results[0].title;
+        }
+    
+        if (document.querySelector(".search").value) {
+            clearPredictions();
+        }
 
-    if (mediaType === "person") {
-        personInfoSearch(id);
-    } else if (mediaType === "movie") {
-        displayMovieInfoSearch(id);
-    }
+        pushToSearchHistory(name, id, mediaType);
 
-    if (document.querySelector(".search").value) {
-        clearPredictions();
+    } else {
+        return false;
     }
 }
 
@@ -805,11 +830,11 @@ async function predictions() {
                 if (searchArr[i] && results.indexOf(searchArr[i]) === -1) {
                     if (searchArr[i].media_type === "person") {
                         let id = searchArr[i].id; 
-                        makeUp += `<li class="list-group-item"><a onclick="personInfoSearch(${id}); clearPredictions()" class="predictionItem">${searchArr[i].name}</a></li>`;
+                        makeUp += `<li class="list-group-item"><a onclick="personInfoSearch(${id}); pushToSearchHistory('${searchArr[i].name}', ${id}, '${searchArr[i].media_type}'); clearPredictions();" class="predictionItem">${searchArr[i].name}</a></li>`;
                         results.push(searchArr[i]);
                         } else if (searchArr[i].media_type === "movie") {
                             let id = searchArr[i].id; 
-                            makeUp += `<li class="list-group-item"><a onclick="displayMovieInfoSearch(${id}); clearPredictions()" class="predictionItem">${searchArr[i].title}</a></li>`;
+                            makeUp += `<li class="list-group-item"><a onclick="displayMovieInfoSearch(${id}); pushToSearchHistory('${searchArr[i].title}', ${id}, '${searchArr[i].media_type}'); clearPredictions();" class="predictionItem">${searchArr[i].title}</a></li>`;
                             results.push(searchArr[i]);
                         }
                 }
@@ -835,4 +860,48 @@ function clearPredictions2() {
         document.getElementById("myPredict").style.display = "hidden";
         document.getElementById("myPredict").innerHTML = "";
     }
+}
+
+function pushToSearchHistory(query, id, mediaType) {
+    const history = localStorage.getItem("history");
+    const object = {
+        name: query,
+        id,
+        mediaType
+    }
+    if (history === null) {
+        const content = [];
+        content.push(object);
+        localStorage.setItem("history", JSON.stringify(content));
+        return content;
+    } else {
+        const content = JSON.parse(history);
+        const names = content.map(el => el.name);
+        if (names.includes(query) === false) {
+            content.push(object);
+            localStorage.setItem("history", JSON.stringify(content));
+            return content;
+        } else {
+            return false;
+        }
+    }
+}
+
+function historyHTML(array) {
+    let markUp = "";
+    for (let i = 0; i < array.length; i++) {
+        if (i > 7) {
+            break;
+        }
+        if (array[i].mediaType === "person") {
+            markUp += `<li class="list-group-item"><a onclick="personInfoSearch(${array[i].id}); pushToSearchHistory('${array[i].name}', ${array[i].id}, '${array[i].mediaType}'); clearPredictions();" class="predictionItem">${array[i].name}</a></li>`;
+        } else if (array[i].mediaType === "movie") {
+            markUp += `<li class="list-group-item"><a onclick="displayMovieInfoSearch(${array[i].id}); pushToSearchHistory('${array[i].name}', ${array[i].id}, '${array[i].mediaType}'); clearPredictions();" class="predictionItem">${array[i].name}</a></li>`;
+        }
+
+    }
+
+    document.getElementById("myPredict").style.display = "block";
+    document.getElementById("myPredict").innerHTML = markUp;
+
 }
