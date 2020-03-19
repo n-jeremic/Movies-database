@@ -204,8 +204,6 @@ function init() {
             }
         }
     })
-    document.querySelector(".search").addEventListener("blur", clearPredictions2);
-
 
     if (localStorage.getItem("favouritePeople")) {
         favPeople = JSON.parse(localStorage.getItem("favouritePeople")); 
@@ -850,14 +848,12 @@ async function predictions() {
 }
 
 function clearPredictions() {
-    document.getElementById("myPredict").style.display = "hidden";
     document.getElementById("myPredict").innerHTML = "";
     document.querySelector(".search").value = "";
 }
 
 function clearPredictions2() {
     if (document.querySelector(".search").value == "") {
-        document.getElementById("myPredict").style.display = "hidden";
         document.getElementById("myPredict").innerHTML = "";
     }
 }
